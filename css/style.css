@@ -1,4 +1,4 @@
-body{
+﻿body{
 background:#f7f8fc;
 }
 
@@ -21,6 +21,77 @@ font-weight:bold;
 
 .winner-card{
 border:3px solid green;
+}
+
+#gameContainer .member-card{
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 0 18px rgba(0,0,0,.08);
+  margin-bottom: 1rem;
+}
+
+#gameContainer .card-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+#gameContainer .card-header h5{
+  margin: 0;
+}
+
+#gameContainer .saved-row{
+  padding: 0.75rem 0.9rem;
+  background: #f8f9fa;
+  border-radius: 0.75rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#gameContainer .bid-row{
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+#gameContainer .bid-row .form-control{
+  flex: 1;
+  min-width: 0;
+}
+
+#gameContainer .bid-row .remove-row{
+  white-space: nowrap;
+}
+
+#gameContainer .add-bid-btn{
+  width: 100%;
+}
+
+.action-buttons{
+  display: flex;
+  gap: 0.75rem;
+  flex-direction: column;
+  width: 100%;
+}
+
+.action-buttons .btn{
+  width: 100%;
+}
+
+@media (min-width: 576px) {
+  .action-buttons{
+    flex-direction: row;
+    width: auto;
+  }
+  .action-buttons .btn{
+    width: auto;
+  }
 }
 
 .table td,

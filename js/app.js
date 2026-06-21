@@ -114,67 +114,74 @@ if(!state.members.length){
  return;
 }
 
-let html = `<table class="table table-bordered"><tr>`;
-
-state.members.forEach(m => { html += `<th>${m}</th>`; });
-
-html += `</tr><tr>`;
+let html = `<div class="row g-3 mb-3">`;
 
 state.members.forEach(member => {
-    // create an empty cell; we'll populate DOM nodes after inserting html
-    html += `<td data-member="${member}"></td>`;
+    html += `
+      <div class="col-12">
+        <div class="member-card" data-member="${member}">
+          <div class="card-header">
+            <h5>${member}</h5>
+            <span class="badge bg-secondary">${state.balances[member] >= 0 ? '+' : '-'}₹${Math.abs(state.balances[member] || 0)}</span>
+          </div>
+          <div class="saved-list"></div>
+          <div class="unsaved-container"></div>
+          <button class="btn btn-sm btn-outline-secondary add-bid-btn">Add New Bid</button>
+        </div>
+      </div>
+    `;
 });
 
-html += `</tr></table>`;
+html += `</div>`;
 
 html += `
-<select id="winnerSelect" class="form-select mb-3">
-<option value="">Select Winner</option>
+<div class="mb-3">
+  <select id="winnerSelect" class="form-select mb-3">
+    <option value="">Select Winner</option>
 `;
 
 state.members.forEach(m => { html += `<option value="${m}">${m}</option>`; });
 
-html += `</select>`;
-
 html += `
-<button class="btn btn-sm btn-outline-primary mb-3" id="addRoundBid">Add New Bid (All)</button>
+  </select>
+  <button class="btn btn-sm btn-outline-primary w-100 mb-2" id="addRoundBid">Add New Bid (All)</button>
+</div>
 `;
 
 html += `
-<button class="btn btn-primary me-2" id="completeRound">Complete</button>
-<button class="btn btn-secondary me-2" id="resetRound">Reset Round</button>
-<button class="btn btn-danger" id="restartGame">Restart Game</button>
+<div class="d-flex flex-column flex-sm-row gap-2">
+  <button class="btn btn-primary flex-fill" id="completeRound">Complete</button>
+  <button class="btn btn-secondary flex-fill" id="resetRound">Reset Round</button>
+  <button class="btn btn-danger flex-fill" id="restartGame">Restart Game</button>
+</div>
 `;
 
 gameContainer.innerHTML = html;
 
-// populate each member cell: show saved bids and one input row by default
 const addRowFns = {};
 
 state.members.forEach(member => {
-    const td = gameContainer.querySelector(`td[data-member="${member}"]`);
+    const card = gameContainer.querySelector(`.member-card[data-member="${member}"]`);
+    const savedList = card.querySelector('.saved-list');
+    const unsavedContainer = card.querySelector('.unsaved-container');
 
-    // saved bids (if any)
     const saved = state.roundData[member] || [];
     saved.forEach(entry => {
         const div = document.createElement('div');
-        div.className = 'mb-2 saved-row';
-        div.innerHTML = `<div class="form-control-plaintext">${entry.action} ₹${entry.amount}</div>`;
-        td.appendChild(div);
+        div.className = 'saved-row';
+        div.innerHTML = `
+          <span>${entry.action}</span>
+          <strong>₹${entry.amount}</strong>
+        `;
+        savedList.appendChild(div);
     });
 
-    // container for dynamic unsaved bid rows
-    const unsavedContainer = document.createElement('div');
-    unsavedContainer.className = 'unsaved-container';
-    td.appendChild(unsavedContainer);
-
-    // helper to add a new bid row inside this td
     function addBidRow(){
         const div = document.createElement('div');
-        div.className = 'mb-2 bid-row d-flex gap-2 align-items-start';
+        div.className = 'bid-row';
         div.innerHTML = `
-            <input type="number" class="form-control mb-0 amount" data-member="${member}" placeholder="Amount">
-            <button class="btn btn-sm btn-outline-danger remove-row">Remove</button>
+          <input type="number" class="form-control amount" data-member="${member}" placeholder="Amount">
+          <button class="btn btn-sm btn-outline-danger remove-row">Remove</button>
         `;
 
         const input = div.querySelector('.amount');
@@ -186,23 +193,15 @@ state.members.forEach(member => {
         input.focus();
     }
 
-    // add initial bid row
     addBidRow();
-
-    // expose function to add a bid row for this member (used by global Add New Bid)
     addRowFns[member] = addBidRow;
 
-    // Add New Bid button
-    const addBtn = document.createElement('button');
-    addBtn.className = 'btn btn-sm btn-outline-secondary mt-2 add-bid-btn';
-    addBtn.innerText = 'Add New Bid';
+    const addBtn = card.querySelector('.add-bid-btn');
     addBtn.onclick = addBidRow;
-    td.appendChild(addBtn);
 });
 
 bindEvents();
 
-// wire global Add New Bid (All) button
 const addRoundBidBtn = document.getElementById('addRoundBid');
 if(addRoundBidBtn){
     addRoundBidBtn.onclick = () => {
@@ -229,8 +228,8 @@ document.getElementById("completeRound").onclick = () => {
 
     // collect all unsaved bid rows and dispatch SET_ROUND for each
     document.querySelectorAll('.unsaved-container').forEach(container => {
-        const memberTd = container.closest('td[data-member]');
-        const member = memberTd ? memberTd.getAttribute('data-member') : null;
+        const memberCard = container.closest('.member-card[data-member]');
+        const member = memberCard ? memberCard.getAttribute('data-member') : null;
         if(!member) return;
 
         container.querySelectorAll('.bid-row').forEach(row => {
